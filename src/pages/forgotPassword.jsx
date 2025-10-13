@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IoIosArrowRoundBack } from "react-icons/io";
 import axios from "axios"
-import server from '../App'
+import { server } from '../App'
 
 function ForgotPassword() {
   const navigate = useNavigate();
