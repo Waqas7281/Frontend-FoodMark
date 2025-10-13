@@ -9,7 +9,7 @@ export const server = "https://food-mark.vercel.app/api/auth";
 function App() {
   return (
     <Routes>
-      <Route path="/signup" element={<Signup />}></Route>
+      <Route path="/" element={<Signup />}></Route>
       <Route path="/signin" element={<SignIn />}></Route>
       <Route path='/home' element={<Home/>}></Route>
       <Route path="/forgot-password" element={<ForgotPassword/>}></Route>
