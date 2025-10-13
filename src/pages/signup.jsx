@@ -46,7 +46,7 @@ function Signup() {
     }
     else{
       const data = { ...formData, role };
-      await axios.post(`${server}/signup`, data, {
+      await axios.post(`https://food-mark.vercel.app/api/auth/signup`, data, {
         withCredentials: true,
       });
       alert("Signup Successful");

@@ -39,7 +39,11 @@ function SignIn() {
          alert("Please fill all the fields");
        } else {
          const data = { ...formData, role };
-         await axios.post(`${server}/signin`,data,{withCredentials:true,});
+         await axios.post(
+           `https://food-mark.vercel.app/api/auth/signin`,
+           data,
+           { withCredentials: true }
+         );
          alert("signin success");
          navigate('/home');
          console.log(data);
