@@ -1,71 +1,73 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaEyeSlash } from "react-icons/fa";
 import { FaEye } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
-import axios from 'axios';
-import {server} from '../App'
-import { auth } from '../../FireBase.js';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import axios from "axios";
+import { server } from "../App";
+import { auth } from "../../FireBase.js";
+import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 
 function Signup() {
-    const primaryColor = "#ff4d2d";
-    const hoverColor = "#ff4d2d";
-    const bgColor = "#ff4d2d";
-    const borderColor = "#ff4d2d";
-    const [hide, setHide] = useState(false);
-    const [role, setRole] = useState("User");
-    const navigate = useNavigate();
-    const [formData,setData] = useState({
-      fullName:"",
-      email:"",
-      phoneNumber:"",
-      password:"",
-      confirmPassword:"",
-    })
+  const primaryColor = "#ff4d2d";
+  const hoverColor = "#ff4d2d";
+  const bgColor = "#ff4d2d";
+  const borderColor = "#ff4d2d";
+  const [hide, setHide] = useState(false);
+  const [role, setRole] = useState("User");
+  const navigate = useNavigate();
+  const [formData, setData] = useState({
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+    confirmPassword: "",
+  });
 
-    const handelGoogleAuth= async()=>{
-      try {
-        const provider = new GoogleAuthProvider()
-        const result = await signInWithPopup(auth,provider)
-        console.log(result)
-       
-      } catch (error) {
-        console.log(error)
+  const handelGoogleAuth = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      console.log(result);
+    } catch (error) {
+      console.log(error);
+    }
+    navigate("/home");
+  };
+
+  const handelSignup = async () => {
+    try {
+      if (
+        !formData.fullName ||
+        !formData.email ||
+        !formData.phoneNumber ||
+        !formData.password ||
+        !formData.confirmPassword
+      ) {
+        alert("Please fill all the fields");
+      } else if (formData.password !== formData.confirmPassword) {
+        alert("Password and Confirm Password must be same");
+      } else {
+        const data = { ...formData, role };
+        await axios.post(`${server}/signup`, data, {
+          withCredentials: true,
+        });
+        alert("Signup Successful");
+        navigate("/signin");
+        console.log(data);
+        setData({
+          fullName: "",
+          email: "",
+          phoneNumber: "",
+          password: "",
+          confirmPassword: "",
+        });
       }
-       navigate("/home");
+    } catch (error) {
+      console.log(error);
     }
+  };
 
-    const handelSignup =async ()=>{
-   try{
-       if(!formData.fullName || !formData.email || !formData.phoneNumber || !formData.password || !formData.confirmPassword){
-        alert("Please fill all the fields")
-    }
-    else if(formData.password !== formData.confirmPassword){
-        alert("Password and Confirm Password must be same")
-    }
-    else{
-      const data = { ...formData, role };
-      await axios.post(`https://food-mark.vercel.app/api/auth/signup`, data, {
-        withCredentials: true,
-      });
-      alert("Signup Successful");
-      navigate("/signin");
-      console.log(data);
-      setData({
-        fullName: "",
-        email: "",
-        phoneNumber: "",
-        password: "",
-        confirmPassword: "",
-      });
-    }
-   }
-  catch(error){
-    console.log(error);
-  }}
-
-    
   return (
     <div
       className="min-h-screen flex items-center justify-center w-full p-4"
@@ -76,7 +78,10 @@ function Signup() {
           className="bg-white rounded-xl shadow-lg max-w-md p-8 border-[1px] w-full"
           style={{ borderColor: borderColor }}
         >
-          <h1 className="text-3xl font-bold mb-2 text-center" style={{ color: primaryColor }}>
+          <h1
+            className="text-3xl font-bold mb-2 text-center"
+            style={{ color: primaryColor }}
+          >
             FoodMark
           </h1>
           <p className="text-gray-600 mb-8 text-center">
@@ -237,13 +242,17 @@ function Signup() {
           </button>
           <button
             className={`w-full mt-4 flex items-center justify-center font-semibold py-2 rounded-lg border border-gray-300 transition duration-200 hover:bg-gray-600`}
-            style={{ backgroundColor: "white", color: "#333" }}  onClick={handelGoogleAuth}
+            style={{ backgroundColor: "white", color: "#333" }}
+            onClick={handelGoogleAuth}
           >
             <FcGoogle size={20} />
             <span>Signup with Google</span>
           </button>
-          <button className="mt-4 text-gray-600 w-full" onClick={()=>navigate('/signin')}>
-            <p className='text-center'>
+          <button
+            className="mt-4 text-gray-600 w-full"
+            onClick={() => navigate("/signin")}
+          >
+            <p className="text-center">
               Already have an account?{" "}
               <span style={{ color: primaryColor }}>SignIn</span>
             </p>
@@ -254,4 +263,4 @@ function Signup() {
   );
 }
 
-export default Signup
+export default Signup;

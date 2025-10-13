@@ -5,8 +5,8 @@ import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { server } from "../App";
-import {auth} from '../../FireBase'
-import { GoogleAuthProvider,signInWithPopup } from "firebase/auth";
+import { auth } from "../../FireBase";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
 function SignIn() {
   const primaryColor = "#ff4d2d";
@@ -21,41 +21,38 @@ function SignIn() {
     password: "",
   });
 
-     const handelGoogleAuth = async () => {
-       try {
-         const provider = new GoogleAuthProvider();
-         const result = await signInWithPopup(auth, provider);
-         console.log(result);
-       } catch (error) {
-         console.log(error);
-       }
-       navigate("/home");
-     };
+  const handelGoogleAuth = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      console.log(result);
+    } catch (error) {
+      console.log(error);
+    }
+    navigate("/home");
+  };
 
-
-  const handelSignup =  async() => {
-   try {
-       if (!formData.email || !formData.password) {
-         alert("Please fill all the fields");
-       } else {
-         const data = { ...formData, role };
-         await axios.post(
-           `https://food-mark.vercel.app/api/auth/signin`,
-           data,
-           { withCredentials: true }
-         );
-         alert("signin success");
-         navigate('/home');
-         console.log(data);
-         setData({
-           email: "",
-           password: "",
-         });
-         setRole("");
-       }
-   } catch (error) {
-      console.log(error)
-   }
+  const handelSignup = async () => {
+    try {
+      if (!formData.email || !formData.password) {
+        alert("Please fill all the fields");
+      } else {
+        const data = { ...formData, role };
+        await axios.post(`${server}/signin`, data, {
+          withCredentials: true,
+        });
+        alert("signin success");
+        navigate("/home");
+        console.log(data);
+        setData({
+          email: "",
+          password: "",
+        });
+        setRole("");
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -122,7 +119,11 @@ function SignIn() {
             </button>
           </div>
         </div>
-        <div className="text-right mb-4 " style={{ color: primaryColor }} onClick={()=>navigate('/forgot-password')}>
+        <div
+          className="text-right mb-4 "
+          style={{ color: primaryColor }}
+          onClick={() => navigate("/forgot-password")}
+        >
           Forgot Password?
         </div>
         {/* confirm password */}
@@ -167,20 +168,23 @@ function SignIn() {
         >
           SignIn
         </button>
-          <button
-                    className={`w-full mt-4 flex items-center justify-center font-semibold py-2 rounded-lg border border-gray-300 transition duration-200 hover:bg-gray-600`}
-                    style={{ backgroundColor: "white", color: "#333" }}
-                    onClick={handelGoogleAuth}
-                  >
-                    <FcGoogle size={20} />
-                    <span>Signup with Google</span>
-                  </button>
-                  <button className="mt-4 text-gray-600 w-full" onClick={()=>navigate('/signup')}>
-                    <p className='text-center'>
-                      Create an account?{" "}
-                      <span style={{ color: primaryColor }}>Signup</span>
-                    </p>
-                  </button>
+        <button
+          className={`w-full mt-4 flex items-center justify-center font-semibold py-2 rounded-lg border border-gray-300 transition duration-200 hover:bg-gray-600`}
+          style={{ backgroundColor: "white", color: "#333" }}
+          onClick={handelGoogleAuth}
+        >
+          <FcGoogle size={20} />
+          <span>Signup with Google</span>
+        </button>
+        <button
+          className="mt-4 text-gray-600 w-full"
+          onClick={() => navigate("/signup")}
+        >
+          <p className="text-center">
+            Create an account?{" "}
+            <span style={{ color: primaryColor }}>Signup</span>
+          </p>
+        </button>
       </div>
     </div>
   );
