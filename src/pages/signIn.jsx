@@ -10,11 +10,9 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { ToastContainer, toast, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-
 function SignIn() {
   const primaryColor = "#ff4d2d";
   const hoverColor = "#ff4d2d";
-  const bgColor = "#ff4d2d";
   const borderColor = "#ff4d2d";
   const [hide, setHide] = useState(false);
   const [role, setRole] = useState("");
@@ -24,6 +22,7 @@ function SignIn() {
     password: "",
   });
 
+
   const handelGoogleAuth = async () => {
     try {
       const provider = new GoogleAuthProvider();
@@ -32,41 +31,47 @@ function SignIn() {
     } catch (error) {
       console.log(error);
     }
-   setTimeout(()=>{
-     navigate("/home");    
-   },2000)
+    setTimeout(() => {
+      navigate("/home");
+    }, 2000);
   };
 
   const handelSignin = async () => {
-    try {
-      if (!formData.email || !formData.password) {
-        toast.warning("Please fill all the fields");
-      } else {
-        const data = { ...formData, role };
-        await axios.post(`${server}/signin`, data, {
-          withCredentials: true,
-        });
-         toast.success("🦄 signin success");
-       setTimeout(()=>{
-         navigate("/home");
-       },2000)
-        console.log(data);
+    if (!formData.email || !formData.password) {
+      toast.warning("Please fill all the fields");
+      return;
+    }
+    if (!role) {
+      toast.warning("Please select a role");
+      return;
+    }
+    const data = { ...formData, role };
+    const promise = axios.post(`${server}/signin`, data, {
+      withCredentials: true,
+    });
+    toast.promise(promise, {
+      pending: "Login is pending",
+      success: "Login Success 👌",
+      error: {
+        render: ({ data }) => data?.message || "Login rejected 🤯"
+      }
+    });
+    promise.then(() => {
+      setTimeout(() => {
+        navigate("/home");
         setData({
           email: "",
           password: "",
         });
         setRole("");
-      }
-    } catch (error) {
-      toast.warning(error?.response?.data?.message)
-    }
+      }, 2000);
+    }).catch(() => {
+      // Error handled by toast.promise
+    });
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center w-full p-4"
-      style={{ backgroundColor: bgColor }}
-    >
+    <div className="min-h-screen flex items-center justify-center w-full p-4  bg-[#fff9f6]">
       <div
         className="bg-white rounded-xl shadow-lg max-w-md p-8 border-[1px]"
         style={{ borderColor: borderColor }}
@@ -193,7 +198,7 @@ function SignIn() {
           </p>
         </button>
       </div>
-      <ToastContainer position="top-right"/>
+      <ToastContainer position="top-right" />
     </div>
   );
 }

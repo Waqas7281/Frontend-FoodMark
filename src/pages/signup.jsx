@@ -7,15 +7,17 @@ import axios from "axios";
 import { server } from "../App";
 import { auth } from "../../FireBase.js";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { ToastContainer, toast, Bounce } from "react-toastify";
+// REMOVED: Toast imports/CSS (handled globally in App.js)
+import { toast } from "react-toastify"; // Only import toast for use here
 
 function Signup() {
   const primaryColor = "#ff4d2d";
-  const hoverColor = "#ff4d2d";
-  const bgColor = "#ff4d2d";
   const borderColor = "#ff4d2d";
-  const [hide, setHide] = useState(false);
+  // REMOVED: Unused hoverColor
+  const [hidePassword, setHidePassword] = useState(false); // Separate for password
+  const [hideConfirmPassword, setHideConfirmPassword] = useState(false); // Separate for confirm
   const [role, setRole] = useState("User");
+  const [isLoading, setIsLoading] = useState(false); // NEW: Loading state
   const navigate = useNavigate();
   const [formData, setData] = useState({
     fullName: "",
@@ -25,51 +27,66 @@ function Signup() {
     confirmPassword: "",
   });
 
-  const handelGoogleAuth = async () => {
+  const handleGoogleAuth = async () => {
+    // Fixed typo
+    setIsLoading(true);
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
+      toast.success("Signed up with Google! Redirecting..."); // NEW: Success toast
       console.log(result);
     } catch (error) {
+      toast.error("Google signup failed. Please try again."); // NEW: Error toast
       console.log(error);
+    } finally {
+      setIsLoading(false);
     }
-    setTimeout(()=>{
+    setTimeout(() => {
       navigate("/home");
-    },2000)
+    }, 2000);
   };
 
-  const handelSignup = async () => {
-    try {
-      if (
-        !formData.fullName ||
-        !formData.email ||
-        !formData.phoneNumber ||
-        !formData.password ||
-        !formData.confirmPassword
-      ) {
-        toast.warning('Fill all Fields');
-      } else if (formData.password !== formData.confirmPassword) {
-        alert("Password and Confirm Password must be same");
-      } else {
-        const data = { ...formData, role };
-        await axios.post(`${server}/signup`, data, {
-          withCredentials: true,
-        });
-        toast.success("🦄 Login Success!", {
-          position: "top-right",
-          autoClose: 2000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "light",
-          transition: Bounce,
-        });
-        setTimeout(()=>{
-          navigate("/signin");
-        },2000)
-        console.log(data);
+  const handleSignup = async () => {
+    // Fixed typo
+    if (isLoading) return; // Prevent double-click
+
+    if (
+      !formData.fullName ||
+      !formData.email ||
+      !formData.phoneNumber ||
+      !formData.password ||
+      !formData.confirmPassword
+    ) {
+      toast.warning("Fill all Fields", { autoClose: 3000 }); // Added autoClose
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      toast.warning("Password and Confirm Password must be same", {
+        autoClose: 3000,
+      });
+      return;
+    }
+
+    setIsLoading(true); // Start loading
+    const data = { ...formData, role };
+    const promise = axios.post(`${server}/signup`, data, {
+      withCredentials: true,
+    });
+
+    toast.promise(promise, {
+      pending: "Signup Pending",
+      success: "Signup Success 👌",
+      error: {
+        render: ({ data: error }) => {
+          // Fixed: Access via error.response
+          return error?.response?.data?.message || "Signup Rejected 🤯";
+        },
+      },
+    });
+
+    promise
+      .then(() => {
+        // Reset form early (before nav)
         setData({
           fullName: "",
           email: "",
@@ -77,17 +94,20 @@ function Signup() {
           password: "",
           confirmPassword: "",
         });
-      }
-    } catch (error) {
-      console.log(error);
-    }
+        setTimeout(() => {
+          navigate("/signin");
+        }, 2000);
+      })
+      .catch(() => {
+        // Error already handled by toast.promise
+      })
+      .finally(() => {
+        setIsLoading(false); // Stop loading
+      });
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center w-full p-4"
-      style={{ backgroundColor: bgColor }}
-    >
+    <div className="min-h-screen flex items-center justify-center w-full p-4 bg-[#fff9f6]">
       <div className="flex flex-col items-center justify-center w-full">
         <div
           className="bg-white rounded-xl shadow-lg max-w-md p-8 border-[1px] w-full"
@@ -102,7 +122,8 @@ function Signup() {
           <p className="text-gray-600 mb-8 text-center">
             Create your account to get started with delicious food deliveries{" "}
           </p>
-          {/* fullname */}
+
+          {/* Fullname - unchanged */}
           <div className="mb-4">
             <label
               htmlFor="fullname"
@@ -116,12 +137,13 @@ function Signup() {
               placeholder="Enter FullName"
               value={formData.fullName}
               style={{ border: `1px solid ${borderColor}` }}
-              onChange={(e) => {
-                setData({ ...formData, fullName: e.target.value });
-              }}
+              onChange={(e) =>
+                setData({ ...formData, fullName: e.target.value })
+              }
             />
           </div>
-          {/* email */}
+
+          {/* Email - unchanged */}
           <div className="mb-4">
             <label
               htmlFor="Email"
@@ -135,12 +157,11 @@ function Signup() {
               placeholder="Enter Your Email"
               value={formData.email}
               style={{ border: `1px solid ${borderColor}` }}
-              onChange={(e) => {
-                setData({ ...formData, email: e.target.value });
-              }}
+              onChange={(e) => setData({ ...formData, email: e.target.value })}
             />
           </div>
-          {/* PhoneNumber */}
+
+          {/* PhoneNumber - unchanged */}
           <div className="mb-4">
             <label
               htmlFor="phoneNumber"
@@ -154,12 +175,13 @@ function Signup() {
               placeholder="Enter Phone Number"
               value={formData.phoneNumber}
               style={{ border: `1px solid ${borderColor}` }}
-              onChange={(e) => {
-                setData({ ...formData, phoneNumber: e.target.value });
-              }}
+              onChange={(e) =>
+                setData({ ...formData, phoneNumber: e.target.value })
+              }
             />
           </div>
-          {/* password */}
+
+          {/* Password - separate toggle */}
           <div className="mb-4">
             <label
               htmlFor="password"
@@ -169,25 +191,26 @@ function Signup() {
             </label>
             <div className="relative">
               <input
-                type={hide ? "text" : "password"}
+                type={hidePassword ? "text" : "password"}
                 className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
                 placeholder="Enter Password"
                 value={formData.password}
                 style={{ border: `1px solid ${borderColor}` }}
-                onChange={(e) => {
-                  setData({ ...formData, password: e.target.value });
-                }}
+                onChange={(e) =>
+                  setData({ ...formData, password: e.target.value })
+                }
               />
               <button
                 className="absolute right-3 top-3 text-gray-500"
                 type="button"
-                onClick={() => setHide(!hide)}
+                onClick={() => setHidePassword(!hidePassword)}
               >
-                {!hide ? <FaEyeSlash /> : <FaEye />}
+                {!hidePassword ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
           </div>
-          {/* confirm password */}
+
+          {/* Confirm Password - separate toggle */}
           <div className="mb-4">
             <label
               htmlFor="confirmPassword"
@@ -197,25 +220,26 @@ function Signup() {
             </label>
             <div className="relative">
               <input
-                type={hide ? "text" : "password"}
+                type={hideConfirmPassword ? "text" : "password"}
                 className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:border-orange-500"
                 placeholder="Enter Confirm Password"
                 value={formData.confirmPassword}
                 style={{ border: `1px solid ${borderColor}` }}
-                onChange={(e) => {
-                  setData({ ...formData, confirmPassword: e.target.value });
-                }}
+                onChange={(e) =>
+                  setData({ ...formData, confirmPassword: e.target.value })
+                }
               />
               <button
                 className="absolute right-3 top-3 text-gray-500"
                 type="button"
-                onClick={() => setHide(!hide)}
+                onClick={() => setHideConfirmPassword(!hideConfirmPassword)}
               >
-                {!hide ? <FaEyeSlash /> : <FaEye />}
+                {!hideConfirmPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
           </div>
-          {/* role */}
+
+          {/* Role - fixed focus color */}
           <div className="mb-4">
             <label
               htmlFor="role"
@@ -227,13 +251,13 @@ function Signup() {
               {["User", "Owner", "Rider"].map((r) => (
                 <button
                   key={r}
-                  className="m-2 p-2 border rounded-lg focus:border-blue-500 cursor-pointer"
+                  className="m-2 p-2 border rounded-lg focus:border-orange-500 cursor-pointer" // Fixed to orange
                   onClick={() => setRole(r)}
                   type="button"
                   style={
                     role === r
                       ? {
-                          backgroundColor: hoverColor,
+                          backgroundColor: primaryColor, // Use primary for active
                           color: "white",
                           border: `1px solid ${borderColor}`,
                         }
@@ -245,24 +269,35 @@ function Signup() {
               ))}
             </div>
           </div>
+
           <button
-            className={`w-full font-semibold py-2 rounded-lg transition duration-200 hover:bg-orange-200`}
+            className={`w-full font-semibold py-2 rounded-lg transition duration-200 ${
+              isLoading
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-orange-200"
+            }`} // Disable styling when loading
             style={{
               backgroundColor: primaryColor,
               color: "white",
             }}
-            onClick={handelSignup}
+            onClick={handleSignup}
+            disabled={isLoading} // NEW: Disable button
           >
-            Signup
+            {isLoading ? "Signing Up..." : "Signup"} {/* NEW: Loading text */}
           </button>
+
           <button
-            className={`w-full mt-4 flex items-center justify-center font-semibold py-2 rounded-lg border border-gray-300 transition duration-200 hover:bg-gray-600`}
+            className={`w-full mt-4 flex items-center justify-center font-semibold py-2 rounded-lg border border-gray-300 transition duration-200 ${
+              isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-600"
+            }`}
             style={{ backgroundColor: "white", color: "#333" }}
-            onClick={handelGoogleAuth}
+            onClick={handleGoogleAuth}
+            disabled={isLoading}
           >
             <FcGoogle size={20} />
-            <span>Signup with Google</span>
+            <span>{isLoading ? "Loading..." : "Signup with Google"}</span>
           </button>
+
           <button
             className="mt-4 text-gray-600 w-full"
             onClick={() => navigate("/signin")}
@@ -274,7 +309,7 @@ function Signup() {
           </button>
         </div>
       </div>
-      <ToastContainer position="top-right"/>
+      {/* REMOVED: Duplicate <ToastContainer /> */}
     </div>
   );
 }
