@@ -7,6 +7,7 @@ import axios from "axios";
 import { server } from "../App";
 import { auth } from "../../FireBase.js";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { ToastContainer, toast, Bounce } from "react-toastify";
 
 function Signup() {
   const primaryColor = "#ff4d2d";
@@ -32,7 +33,9 @@ function Signup() {
     } catch (error) {
       console.log(error);
     }
-    navigate("/home");
+    setTimeout(()=>{
+      navigate("/home");
+    },2000)
   };
 
   const handelSignup = async () => {
@@ -44,7 +47,7 @@ function Signup() {
         !formData.password ||
         !formData.confirmPassword
       ) {
-        alert("Please fill all the fields");
+        toast.warning('Fill all Fields');
       } else if (formData.password !== formData.confirmPassword) {
         alert("Password and Confirm Password must be same");
       } else {
@@ -52,8 +55,20 @@ function Signup() {
         await axios.post(`${server}/signup`, data, {
           withCredentials: true,
         });
-        alert("Signup Successful");
-        navigate("/signin");
+        toast.success("🦄 Login Success!", {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+          transition: Bounce,
+        });
+        setTimeout(()=>{
+          navigate("/signin");
+        },2000)
         console.log(data);
         setData({
           fullName: "",
@@ -259,6 +274,7 @@ function Signup() {
           </button>
         </div>
       </div>
+      <ToastContainer position="top-right"/>
     </div>
   );
 }

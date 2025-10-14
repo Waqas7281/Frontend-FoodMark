@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { IoIosArrowRoundBack } from "react-icons/io";
 import axios from "axios"
 import { server } from '../App'
+import { ToastContainer, toast, Bounce } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function ForgotPassword() {
   const navigate = useNavigate();
@@ -24,8 +26,8 @@ function ForgotPassword() {
    console.log("Step 1 submit triggered");
 
    try {
-     if (!email) {
-       alert("Please enter your email address.");
+     if (!email.email.trim()) {
+       toast.warning("Please enter your email address.");
        return; // Early exit to avoid proceeding
      }
 
@@ -42,7 +44,7 @@ function ForgotPassword() {
      );
 
      console.log("OTP sent successfully:", response.data);
-     alert("OTP sent to your email! Check your inbox.");
+     toast.success("OTP sent to your email! Check your inbox.");
      setStep(2);
    } catch (error) {
      console.error(
@@ -52,13 +54,11 @@ function ForgotPassword() {
 
      // User-friendly error based on status
      if (error.response?.status === 404) {
-       alert(
-         "Service unavailable. The OTP endpoint is not set up yet—check your backend routes."
-       );
+       toast.error("Service unavailable.");
      } else if (error.response?.status === 400) {
-       alert("Invalid email. Please try again.");
+       toast.error("Invalid email. Please try again.");
      } else {
-       alert("Something went wrong. Please try again later.");
+       toast.error("Something went wrong.");
      }
    }
  };
@@ -66,7 +66,7 @@ function ForgotPassword() {
   const handleStep2Submit = async() => {
     try {
       if (!otp.otp.trim()) {
-        alert("Please fill all the fields");
+        toast.warning("Please fill all the fields");
         return;
       }
       else{
@@ -74,13 +74,12 @@ function ForgotPassword() {
         await axios.post(`${server}/verifyOtp`, data, {
           withCredentials: true,
         });
-        alert('otp send to  backend');
+        toast.success("Otp send to Backend");
       }
       // Here you would typically verify the OTP and navigate to reset password
-      alert("OTP verified! Redirecting to reset password...");
       setStep(3);
     } catch (error) {
-      console.log(error)
+      toast.warning(error?.response?.data?.message)
     }
     // navigate("/reset-password"); // Uncomment if route exists
   };
@@ -91,10 +90,10 @@ function ForgotPassword() {
        !passwordData.newPassword.trim() ||
        !passwordData.confirmPassword.trim()
      ) {
-       alert("Please fill all the fields");
+       toast.warning("Please fill all the fields");
        return;
      } else if (passwordData.newPassword !== passwordData.confirmPassword) {
-       alert("New Password and Confirm Password must be same");
+       toast.warning("Password must be same")
        return;
      } else {
       await axios.post(
@@ -102,13 +101,14 @@ function ForgotPassword() {
         {...passwordData,...email},
         { withCredentials: true }
       );
-       alert(
-         "Password reset successful! Please sign in with your new password."
-       );
-       navigate("/signin");
+       toast.success(
+         "Password reset successful! Please sign in with your new password.");
+       setTimeout(()=>{
+        navigate("/signin");
+       },2000)
      }
    } catch (error) {
-    console.log(error)
+    toast.warning(error?.response?.data?.message)
    }
   }
   return (
@@ -129,6 +129,7 @@ function ForgotPassword() {
         <div>
           {step === 1 && (
             <div>
+              <ToastContainer position="top-right" />
               <div className="mb-4">
                 <label
                   htmlFor="email"
@@ -157,6 +158,7 @@ function ForgotPassword() {
           )}
           {step === 2 && (
             <div>
+              <ToastContainer position="top-right" />
               <div className="mb-4">
                 <label
                   htmlFor="otp"
@@ -185,12 +187,13 @@ function ForgotPassword() {
           )}
           {step === 3 && (
             <div>
+              <ToastContainer position="top-right" />
               <div className="mb-4">
                 <label
                   htmlFor="otp"
                   className="block text-gray-700 font-medium mb-1"
                 >
-                  Register your  Password
+                  Register your Password
                 </label>
                 <input
                   id="otp"
@@ -199,7 +202,10 @@ function ForgotPassword() {
                   placeholder=" New Password"
                   value={passwordData.newPassword}
                   onChange={(e) => {
-                    setPasswordData({ ...passwordData, newPassword: e.target.value });
+                    setPasswordData({
+                      ...passwordData,
+                      newPassword: e.target.value,
+                    });
                   }}
                 />
                 <input

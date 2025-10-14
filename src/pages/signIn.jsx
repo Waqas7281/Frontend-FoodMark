@@ -7,6 +7,9 @@ import axios from "axios";
 import { server } from "../App";
 import { auth } from "../../FireBase";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { ToastContainer, toast, Bounce } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 function SignIn() {
   const primaryColor = "#ff4d2d";
@@ -29,20 +32,24 @@ function SignIn() {
     } catch (error) {
       console.log(error);
     }
-    navigate("/home");
+   setTimeout(()=>{
+     navigate("/home");    
+   },2000)
   };
 
-  const handelSignup = async () => {
+  const handelSignin = async () => {
     try {
       if (!formData.email || !formData.password) {
-        alert("Please fill all the fields");
+        toast.warning("Please fill all the fields");
       } else {
         const data = { ...formData, role };
         await axios.post(`${server}/signin`, data, {
           withCredentials: true,
         });
-        alert("signin success");
-        navigate("/home");
+         toast.success("🦄 signin success");
+       setTimeout(()=>{
+         navigate("/home");
+       },2000)
         console.log(data);
         setData({
           email: "",
@@ -51,7 +58,7 @@ function SignIn() {
         setRole("");
       }
     } catch (error) {
-      console.log(error);
+      toast.warning(error?.response?.data?.message)
     }
   };
 
@@ -164,7 +171,7 @@ function SignIn() {
             backgroundColor: primaryColor,
             color: "white",
           }}
-          onClick={handelSignup}
+          onClick={handelSignin}
         >
           SignIn
         </button>
@@ -178,7 +185,7 @@ function SignIn() {
         </button>
         <button
           className="mt-4 text-gray-600 w-full"
-          onClick={() => navigate("/signup")}
+          onClick={() => navigate("/")}
         >
           <p className="text-center">
             Create an account?{" "}
@@ -186,6 +193,7 @@ function SignIn() {
           </p>
         </button>
       </div>
+      <ToastContainer position="top-right"/>
     </div>
   );
 }
