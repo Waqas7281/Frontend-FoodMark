@@ -12,15 +12,14 @@ import "react-toastify/dist/ReactToastify.css";
 import { useSelector } from "react-redux";
 import useGetCity from "./hooks/useGetCity";
 
-export const server = "https://food-mark.vercel.app/api/auth";
-export const userData = "http://localhost:8000/api/user";
+export const server = "https://food-mark.vercel.app";
+export const userData = "https://food-mark.vercel.app";
 
 
-
-function App() {
-   useGetCurrent();
-   useGetCity();
-   const {userData} = useSelector(state=>state.user)
+https: function App() {
+  useGetCurrent();
+  useGetCity();
+  const { userData } = useSelector((state) => state.user);
   return (
     <>
       <Routes>
