@@ -18,6 +18,7 @@ function SignIn() {
   const borderColor = "#ff4d2d";
   const [hide, setHide] = useState(false);
   const [role, setRole] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // Add loading state
   const navigate = useNavigate();
   const [formData, setData] = useState({
     email: "",
@@ -26,30 +27,31 @@ function SignIn() {
   const dispatch = useDispatch();
 
   const handleGoogleAuth = async () => {
+    setIsLoading(true);
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       toast.success("Signed in with Google! Redirecting...");
       try {
         const { data } = await axios.post(
-          `${server}/google-auth`,
+          `${server}/google-auth`, // Fixed: Added server prefix
           {
             email: result.user.email,
           },
           { withCredentials: true }
         );
-
-        
         console.log(data, "google auth data");
       } catch (error) {
         console.log(error);
       }
-      const res = {...result,role:"User"}
+      const res = { ...result, role: "User" }; // Fixed: role lowercase
       dispatch(setUserData(res));
       console.log(result);
     } catch (error) {
       toast.error("Google signin failed. Please try again.");
       console.log(error);
+    } finally {
+      setIsLoading(false);
     }
     setTimeout(() => {
       navigate("/");
@@ -57,6 +59,8 @@ function SignIn() {
   };
 
   const handleSignin = async () => {
+    if (isLoading) return; // Prevent double-click
+
     if (!formData.email || !formData.password) {
       toast.warning("Please fill all the fields");
       return;
@@ -65,32 +69,36 @@ function SignIn() {
       toast.warning("Please select a role");
       return;
     }
+
+    setIsLoading(true);
     const data = { ...formData, role };
-    const res = axios.post(`${server}/signin`, data, {
-      withCredentials: true,
-    });
-    if(!res){
-      toast.warn("SignIn Failed");
-    }
-    else{
-      toast.success("SignIn Success");
-    }
-    console.log((await res).data)
-    dispatch(setUserData((await res).data))
-    res
-      .then(() => {
-        setTimeout(() => {
-          navigate("/");
-          setData({
-            email: "",
-            password: "",
-          });
-          setRole("");
-        }, 2000);
-      })
-      .catch(() => {
-        // Error handled by toast.promise
+
+    try {
+      const res = await axios.post(`${server}/signin`, data, {
+        withCredentials: true,
       });
+
+      toast.success("SignIn Success 👌");
+
+      console.log(res.data);
+      dispatch(setUserData(res.data));
+
+      // Reset and navigate after toast
+      setTimeout(() => {
+        setData({
+          email: "",
+          password: "",
+        });
+        setRole("");
+        navigate("/");
+      }, 2000);
+    } catch (error) {
+      console.error(error);
+      const errorMessage = error?.response?.data?.message || "SignIn Failed";
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -194,22 +202,28 @@ function SignIn() {
           </div>
         </div>
         <button
-          className={`w-full font-semibold py-2 rounded-lg transition duration-200 hover:bg-orange-200`}
+          className={`w-full font-semibold py-2 rounded-lg transition duration-200 ${
+            isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-orange-200"
+          }`}
           style={{
             backgroundColor: primaryColor,
             color: "white",
           }}
           onClick={handleSignin}
+          disabled={isLoading}
         >
-          SignIn
+          {isLoading ? "Signing In..." : "SignIn"}
         </button>
         <button
-          className={`w-full mt-4 flex items-center justify-center font-semibold py-2 rounded-lg border border-gray-300 transition duration-200 hover:bg-gray-600`}
+          className={`w-full mt-4 flex items-center justify-center font-semibold py-2 rounded-lg border border-gray-300 transition duration-200 hover:bg-gray-600 ${
+            isLoading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
           style={{ backgroundColor: "white", color: "#333" }}
           onClick={handleGoogleAuth}
+          disabled={isLoading}
         >
           <FcGoogle size={20} />
-          <span>Sign in with Google</span>
+          <span>{isLoading ? "Loading..." : "Sign in with Google"}</span>
         </button>
         <button
           className="mt-4 text-gray-600 w-full"

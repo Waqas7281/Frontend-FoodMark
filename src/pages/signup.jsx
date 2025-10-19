@@ -31,35 +31,29 @@ function Signup() {
   });
 
   const handleGoogleAuth = async () => {
-    // Fixed typo
-    setIsLoading(true);
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      toast.success("Signed up with Google! Redirecting..."); // NEW: Success toast
+      toast.success("Signed in with Google! Redirecting...");
       try {
-        const { data } = await axios.post(
-          `${server}/google-auth`, // Fixed: Added server prefix
+        const  data  = await axios.post(
+          `/google-auth`,
           {
-            fullName: result.user.displayName,
             email: result.user.email,
-            role,
-            phoneNumber: formData.phoneNumber,
           },
           { withCredentials: true }
         );
-        const res = { ...result, role: "User" };
-        dispatch(setUserData(res));
+
+        console.log(data, "google auth data");
       } catch (error) {
-        console.log(error)
+        console.log(error);
       }
-      dispatch(setUserData(result))
+      const res = { ...result, role: "User" };
+      dispatch(setUserData(res));
       console.log(result);
     } catch (error) {
-      toast.error("Google signup failed. Please try again."); // NEW: Error toast
+      toast.error("Google signin failed. Please try again.");
       console.log(error);
-    } finally {
-      setIsLoading(false);
     }
     setTimeout(() => {
       navigate("/");
