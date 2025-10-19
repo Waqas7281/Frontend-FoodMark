@@ -36,10 +36,7 @@ function ForgotPassword() {
        `${server}/sendotp`,
        email, // Wrap in object if 'email' is a string variable
        {
-         withCredentials: true,
-         headers: {
-           "Content-Type": "application/json", // Explicitly set for JSON body
-         },
+        
        }
      );
 

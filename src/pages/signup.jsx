@@ -53,7 +53,8 @@ function Signup() {
       console.log(result);
     } catch (error) {
       toast.error("Google signin failed. Please try again.");
-      console.log(error);
+      toast.warn(error.response.data)
+      console.log(error.response);
     }
     setTimeout(() => {
       navigate("/");
