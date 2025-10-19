@@ -15,7 +15,6 @@ import useGetCity from "./hooks/useGetCity";
 export const server = "https://food-mark.vercel.app";
 export const userData = "https://food-mark.vercel.app";
 
-
 function App() {
   useGetCurrent();
   useGetCity();

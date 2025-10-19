@@ -34,6 +34,7 @@ function SignIn() {
                 email:result.user.email
               },{withCredentials:true}) 
               dispatch(setUserData(data));
+              console.log(data);
             } catch (error) {
               console.log(error)
             }
