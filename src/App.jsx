@@ -1,24 +1,45 @@
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Signup from "./pages/signup";
 import SignIn from "./pages/signIn";
 import ForgotPassword from "./pages/forgotPassword";
 import Home from "./pages/Home";
+import useGetCurrent from './hooks/useGetCurrent'
 
 // NEW: Import ToastContainer and CSS
 import { ToastContainer, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useSelector } from "react-redux";
+import useGetCity from "./hooks/useGetCity";
 
 export const server = "https://food-mark.vercel.app/api/auth";
+export const userData = "http://localhost:8000/api/user";
+
+
 
 function App() {
+   useGetCurrent();
+   useGetCity();
+   const {userData} = useSelector(state=>state.user)
   return (
     <>
       <Routes>
-        <Route path="/" element={<Signup />}></Route>
-        <Route path="/signin" element={<SignIn />}></Route>
-        <Route path="/home" element={<Home />}></Route>
-        <Route path="/forgot-password" element={<ForgotPassword />}></Route>
+        <Route
+          path="/signup"
+          element={!userData ? <Signup /> : <Navigate to={"/"} />}
+        ></Route>
+        <Route
+          path="/signin"
+          element={!userData ? <SignIn /> : <Navigate to={"/"} />}
+        ></Route>
+        <Route
+          path="/"
+          element={userData ? <Home /> : <Navigate to={"/signin"} />}
+        ></Route>
+        <Route
+          path="/forgot-password"
+          element={!userData ? <ForgotPassword /> : <Navigate to={"/"} />}
+        ></Route>
       </Routes>
       {/* NEW: Add ToastContainer here - it's now global and persists across routes */}
       <ToastContainer

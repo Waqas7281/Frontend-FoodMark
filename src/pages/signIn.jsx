@@ -9,6 +9,8 @@ import { auth } from "../../FireBase";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { ToastContainer, toast, Bounce } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useDispatch } from "react-redux";
+import { setUserData } from "../redux/user.slice";
 
 function SignIn() {
   const primaryColor = "#ff4d2d";
@@ -21,18 +23,26 @@ function SignIn() {
     email: "",
     password: "",
   });
-
+  const dispatch = useDispatch();
 
   const handelGoogleAuth = async () => {
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
+      try {
+              const {data} =await  axios.post(`${server}/google-auth`,{
+                email:result.user.email
+              },{withCredentials:true}) 
+              dispatch(setUserData(data));
+            } catch (error) {
+              console.log(error)
+            }
       console.log(result);
     } catch (error) {
       console.log(error);
     }
     setTimeout(() => {
-      navigate("/home");
+      navigate("/");
     }, 2000);
   };
 
@@ -49,6 +59,7 @@ function SignIn() {
     const promise = axios.post(`${server}/signin`, data, {
       withCredentials: true,
     });
+    dispatch(setUserData(promise.data))
     toast.promise(promise, {
       pending: "Login is pending",
       success: "Login Success 👌",
@@ -58,7 +69,7 @@ function SignIn() {
     });
     promise.then(() => {
       setTimeout(() => {
-        navigate("/home");
+        navigate("/");
         setData({
           email: "",
           password: "",

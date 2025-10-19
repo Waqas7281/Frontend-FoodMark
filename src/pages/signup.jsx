@@ -9,6 +9,9 @@ import { auth } from "../../FireBase.js";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 // REMOVED: Toast imports/CSS (handled globally in App.js)
 import { toast } from "react-toastify"; // Only import toast for use here
+import { useDispatch } from "react-redux";
+import { setUserData } from "../redux/user.slice.js";
+
 
 function Signup() {
   const primaryColor = "#ff4d2d";
@@ -34,6 +37,17 @@ function Signup() {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       toast.success("Signed up with Google! Redirecting..."); // NEW: Success toast
+      try {
+        const {data} =await  axios.post(`${server}/google-auth`,{
+          fullName:result.user.displayName,
+          email:result.user.email,
+          role,
+          phoneNumber
+        },{withCredentials:true}) 
+        dispatch(setUserData(data));
+      } catch (error) {
+        console.log(error)
+      }
       console.log(result);
     } catch (error) {
       toast.error("Google signup failed. Please try again."); // NEW: Error toast
@@ -42,9 +56,11 @@ function Signup() {
       setIsLoading(false);
     }
     setTimeout(() => {
-      navigate("/home");
+      navigate("/");
     }, 2000);
   };
+
+  const dispatch = useDispatch();
 
   const handleSignup = async () => {
     // Fixed typo
@@ -72,6 +88,7 @@ function Signup() {
     const promise = axios.post(`${server}/signup`, data, {
       withCredentials: true,
     });
+    dispatch(setUserData(promise.data))
 
     toast.promise(promise, {
       pending: "Signup Pending",
