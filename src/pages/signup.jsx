@@ -38,16 +38,22 @@ function Signup() {
       const result = await signInWithPopup(auth, provider);
       toast.success("Signed up with Google! Redirecting..."); // NEW: Success toast
       try {
-        const {data} =await  axios.post(`${server}/google-auth`,{
-          fullName:result.user.displayName,
-          email:result.user.email,
-          role,
-          phoneNumber
-        },{withCredentials:true}) 
-        dispatch(setUserData(data));
+        const { data } = await axios.post(
+          `${server}/google-auth`, // Fixed: Added server prefix
+          {
+            fullName: result.user.displayName,
+            email: result.user.email,
+            role,
+            phoneNumber: formData.phoneNumber,
+          },
+          { withCredentials: true }
+        );
+        const res = { ...result, role: "User" };
+        dispatch(setUserData(res));
       } catch (error) {
         console.log(error)
       }
+      dispatch(setUserData(result))
       console.log(result);
     } catch (error) {
       toast.error("Google signup failed. Please try again."); // NEW: Error toast
@@ -85,42 +91,41 @@ function Signup() {
 
     setIsLoading(true); // Start loading
     const data = { ...formData, role };
-    const promise = axios.post(`${server}/signup`, data, {
-      withCredentials: true,
-    });
-    dispatch(setUserData(promise.data))
 
-    toast.promise(promise, {
-      pending: "Signup Pending",
-      success: "Signup Success 👌",
-      error: {
-        render: ({ data: error }) => {
-          // Fixed: Access via error.response
-          return error?.response?.data?.message || "Signup Rejected 🤯";
-        },
-      },
-    });
+    try {
+      toast.loading("Signup Pending"); // Manual pending toast
 
-    promise
-      .then(() => {
-        // Reset form early (before nav)
-        setData({
-          fullName: "",
-          email: "",
-          phoneNumber: "",
-          password: "",
-          confirmPassword: "",
-        });
-        setTimeout(() => {
-          navigate("/signin");
-        }, 2000);
-      })
-      .catch(() => {
-        // Error already handled by toast.promise
-      })
-      .finally(() => {
-        setIsLoading(false); // Stop loading
+      await axios.post(
+        `${server}/signup`,
+        data,
+        {
+          withCredentials: true,
+        }
+      );
+
+      toast.dismiss(); // Dismiss pending toast
+      toast.success("Signup Success 👌"); // Success toast
+
+      // Reset form early (before nav)
+      setData({
+        fullName: "",
+        email: "",
+        phoneNumber: "",
+        password: "",
+        confirmPassword: "",
       });
+      setTimeout(() => {
+        navigate("/signin");
+      }, 4000);
+    } catch (error) {
+      toast.dismiss(); // Dismiss pending toast
+      // Fixed: Access via error.response
+      const errorMessage = error?.response?.data?.message || "Signup Rejected 🤯";
+      toast.error(errorMessage);
+      console.error(error);
+    } finally {
+      setIsLoading(false); // Stop loading
+    }
   };
 
   return (

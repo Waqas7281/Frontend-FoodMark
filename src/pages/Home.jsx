@@ -10,8 +10,6 @@ function Home() {
   const {userData} = useSelector(state=>state.user)
   return (
     <div>
-      <h1>my name is waqas</h1>
-      <Signout/>
       {userData.role == "User" && <UserDashbord />}
       {userData.role =="Owner" && <OwnerDashboard/> }
       {userData.role =="Rider" && <DeliveryBoy/>}

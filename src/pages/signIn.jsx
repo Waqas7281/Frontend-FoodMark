@@ -25,21 +25,30 @@ function SignIn() {
   });
   const dispatch = useDispatch();
 
-  const handelGoogleAuth = async () => {
+  const handleGoogleAuth = async () => {
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
+      toast.success("Signed in with Google! Redirecting...");
       try {
-              const {data} =await  axios.post(`${server}/google-auth`,{
-                email:result.user.email
-              },{withCredentials:true}) 
-              dispatch(setUserData(data));
-              console.log(data);
-            } catch (error) {
-              console.log(error)
-            }
+        const { data } = await axios.post(
+          `${server}/google-auth`,
+          {
+            email: result.user.email,
+          },
+          { withCredentials: true }
+        );
+
+        
+        console.log(data, "google auth data");
+      } catch (error) {
+        console.log(error);
+      }
+      const res = {...result,role:"User"}
+      dispatch(setUserData(res));
       console.log(result);
     } catch (error) {
+      toast.error("Google signin failed. Please try again.");
       console.log(error);
     }
     setTimeout(() => {
@@ -47,7 +56,7 @@ function SignIn() {
     }, 2000);
   };
 
-  const handelSignin = async () => {
+  const handleSignin = async () => {
     if (!formData.email || !formData.password) {
       toast.warning("Please fill all the fields");
       return;
@@ -57,29 +66,31 @@ function SignIn() {
       return;
     }
     const data = { ...formData, role };
-    const promise = axios.post(`${server}/signin`, data, {
+    const res = axios.post(`${server}/signin`, data, {
       withCredentials: true,
     });
-    dispatch(setUserData(promise.data))
-    toast.promise(promise, {
-      pending: "Login is pending",
-      success: "Login Success 👌",
-      error: {
-        render: ({ data }) => data?.message || "Login rejected 🤯"
-      }
-    });
-    promise.then(() => {
-      setTimeout(() => {
-        navigate("/");
-        setData({
-          email: "",
-          password: "",
-        });
-        setRole("");
-      }, 2000);
-    }).catch(() => {
-      // Error handled by toast.promise
-    });
+    if(!res){
+      toast.warn("SignIn Failed");
+    }
+    else{
+      toast.success("SignIn Success");
+    }
+    console.log((await res).data)
+    dispatch(setUserData((await res).data))
+    res
+      .then(() => {
+        setTimeout(() => {
+          navigate("/");
+          setData({
+            email: "",
+            password: "",
+          });
+          setRole("");
+        }, 2000);
+      })
+      .catch(() => {
+        // Error handled by toast.promise
+      });
   };
 
   return (
@@ -159,11 +170,11 @@ function SignIn() {
           >
             Role
           </label>
-          <div className="relative">
+          <div className="relative flex justify-center">
             {["User", "Owner", "Rider"].map((r) => (
               <button
                 key={r}
-                className="m-2 p-2 border rounded-lg focus:border-blue-500 cursor-pointer"
+                className="m-2 p-2 border rounded-lg focus:border-orange-500 cursor-pointer"
                 value={role}
                 onClick={() => setRole(r)}
                 type="button"
@@ -188,21 +199,21 @@ function SignIn() {
             backgroundColor: primaryColor,
             color: "white",
           }}
-          onClick={handelSignin}
+          onClick={handleSignin}
         >
           SignIn
         </button>
         <button
           className={`w-full mt-4 flex items-center justify-center font-semibold py-2 rounded-lg border border-gray-300 transition duration-200 hover:bg-gray-600`}
           style={{ backgroundColor: "white", color: "#333" }}
-          onClick={handelGoogleAuth}
+          onClick={handleGoogleAuth}
         >
           <FcGoogle size={20} />
-          <span>Signup with Google</span>
+          <span>Sign in with Google</span>
         </button>
         <button
           className="mt-4 text-gray-600 w-full"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/signup")}
         >
           <p className="text-center">
             Create an account?{" "}
