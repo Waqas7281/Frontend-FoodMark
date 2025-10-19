@@ -4,7 +4,7 @@ import Signup from "./pages/signup";
 import SignIn from "./pages/signIn";
 import ForgotPassword from "./pages/forgotPassword";
 import Home from "./pages/Home";
-import useGetCurrent from './hooks/useGetCurrent'
+import useGetCurrent from "./hooks/useGetCurrent";
 
 // NEW: Import ToastContainer and CSS
 import { ToastContainer, Bounce } from "react-toastify";
@@ -16,7 +16,7 @@ export const server = "https://food-mark.vercel.app";
 export const userData = "https://food-mark.vercel.app";
 
 
-https: function App() {
+function App() {
   useGetCurrent();
   useGetCity();
   const { userData } = useSelector((state) => state.user);
