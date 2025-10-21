@@ -4,9 +4,9 @@ import { IoIosSearch } from "react-icons/io";
 import { FiShoppingCart } from "react-icons/fi";
 import { useSelector } from 'react-redux';
 import { RxCross2 } from "react-icons/rx";
-
+import useGetCity from '../hooks/useGetCity';
 function Navbar() {
-    const {userData} = useSelector(state=>state.user)
+    const {userData,city} = useSelector(state=>state.user)
     const [showInfo,setShowInfo]=useState(false);
     const [search, setShowSearch] = useState(false);
   return (
@@ -16,7 +16,7 @@ function Navbar() {
         <div className="flex items-center w-[30%] overflow-hidden gap-[10px] px-[10px] border-r-[2px]  border-gray-400 ">
           <FaLocationDot size={25} className="text-[#ff4d2d]" />
           <div className="w-[80%] flex items-center gap-[10px] text-gray-600">
-            Lahore
+            {city}
           </div>
         </div>
         <div className="flex">
@@ -47,7 +47,7 @@ function Navbar() {
             <div className="flex items-center w-[30%] overflow-hidden gap-[10px] px-[10px] border-r-[2px]  border-gray-400 ">
               <FaLocationDot size={25} className="text-[#ff4d2d]" />
               <div className="w-[80%] flex items-center gap-[10px] text-gray-600">
-                Lahore
+                {city}
               </div>
             </div>
             <div className="flex">
