@@ -22,7 +22,7 @@ function useGetCity() {
             );
            
             console.log(res.data.results[0].city);
-            dispatch(setCity(res.data.results[0].city));
+            dispatch(setCity(res?.data?.results[0]?.city));
         })
     },[])
 }

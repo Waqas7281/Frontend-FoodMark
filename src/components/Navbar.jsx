@@ -2,10 +2,28 @@ import React, { useState } from 'react'
 import { FaLocationDot } from "react-icons/fa6";
 import { IoIosSearch } from "react-icons/io";
 import { FiShoppingCart } from "react-icons/fi";
-import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { RxCross2 } from "react-icons/rx";
-import useGetCity from '../hooks/useGetCity';
+import { server } from '../App';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { setUserData } from '../redux/user.slice';
+import { useSelector } from 'react-redux';
+
+ 
 function Navbar() {
+    const dispatch = useDispatch(); 
+    const handelLogout= async ()=>{
+       try {
+        const res =await axios.get(`${server}/signout`,{withCredential:true});
+          console.log(res,"logout result");
+          toast.success(res?.data?.message);
+        dispatch(setUserData(null));  
+       } catch (error) {
+        toast.warning("Error in SignOut")
+        console.log(error)
+       }
+    }
     const {userData,city} = useSelector(state=>state.user)
     const [showInfo,setShowInfo]=useState(false);
     const [search, setShowSearch] = useState(false);
@@ -74,7 +92,7 @@ function Navbar() {
           className="w-[40px] h-[40px] rounded-full flex items-center justify-center bg-[#ff4d2d] text-white text-[18px] shadow-xl font-semibold cursor-pointer"
           onClick={() => setShowInfo((prev) => !prev)}
         >
-          {userData?.fullName?.charAt(0)}
+          {userData?.fullName?.charAt(0) || userData?.user?.displayName?.charAt(0)}
         </div>
         {showInfo && (
           <div className="fixed top-[80px] right-[10px] md:right-[10%] lg:right-[25%] w-[180px]  bg-white shadow-2xl rounded-xl p-[20px]  flex flex-col gap-[10px] z-[9999]">
@@ -82,7 +100,7 @@ function Navbar() {
             <div className="md:hidden text-[#ff4d2d] font-semibold cursor-pointer">
               My Order
             </div>
-            <div className="text-[#ff4d2d] font-semibold cursor-pointer">
+            <div className="text-[#ff4d2d] font-semibold cursor-pointer" onClick={handelLogout}>
               Log Out
             </div>
           </div>
